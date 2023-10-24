@@ -1,0 +1,62 @@
+# Flujo de trabajo para iOS
+workflows:
+  version: 2
+
+  build-and-deploy-ios:
+    name: "Build and Deploy iOS"
+    on:
+      push:
+        branches:
+          - main
+    environment:
+      xcode: latest
+    steps:
+      - name: "Construir la aplicación para iOS"
+        script: |
+          cd ios
+          pod install
+          xcodebuild -workspace AwesomeProject.xcworkspace -scheme AwesomeProject -configuration Release -archivePath build/AwesomeProject.xcarchive archive
+          xcodebuild -exportArchive -archivePath build/AwesomeProject.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build
+        artifacts:
+          - ios/build/AwesomeProject.ipa
+
+      - name: "Preparar archivos para descarga"
+        script: mv ios/build/AwesomeProject.ipa build/AwesomeProject.ipa
+        artifacts:
+          - build/AwesomeProject.ipa
+
+      # - name: "Publicar archivos iOS"
+      #   deploy:
+      #     provider: s3
+      #     access_key_id: $AWS_ACCESS_KEY_ID
+      #     secret_access_key: $AWS_SECRET_ACCESS_KEY
+      #     region: us-east-1
+      #     bucket: my-bucket-name
+      #     local_dir: build
+      #     acl: public-read
+
+# Flujo de trabajo para Android
+workflows:
+  version: 2
+
+  build-and-deploy-android:
+    name: "Build and Deploy Android"
+    on:
+      push:
+        branches:
+          - main
+    environment:
+      android: latest
+    steps:
+      - name: "Construir la aplicación para Android"
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+        artifacts:
+          - android/app/build/outputs/apk/release/app-release.apk
+
+      - name: "Preparar archivos para descarga"
+        script: mv android/app/build/outputs/apk/release/app-release.apk build/app-release.apk
+        artifacts:
+          - build/app-release.apk
