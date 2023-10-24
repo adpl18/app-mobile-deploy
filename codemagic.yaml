@@ -17,9 +17,15 @@ workflows:
       - name: Instalar cocoapods
         script: |
           gem install cocoapods
+      - name: Inicializar podfile
+        script: |
+          pod init
       - name: Cd IOS
         script: |
           cd ios
+      - name: Inicializar podfile
+        script: |
+          pod init
       - name: Install pods
         script: |
           pod install
